@@ -5,6 +5,7 @@ import connectDB from "../../config/ormconfig";
 // Import middlewares
 import authenticateCustomerToken from "../../middlewares/customerAuthMiddleware";
 
+// Encrypt password
 const bcrypt = require("bcrypt");
 
 const app = express();

@@ -4,6 +4,7 @@ import connectDB from "../config/ormconfig";
 // Import API routes
 import customerRoutes from "./routes/customerRoutes";
 import customerLoginRoutes from "../authentication/customerLoginRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 const mainServer = () => {
     const app = express();
@@ -17,6 +18,7 @@ const mainServer = () => {
     // Fetching API from the respective routes
     app.use("/api/customers", customerRoutes);
     app.use("/api/customers", customerLoginRoutes);
+    app.use("/api/admin", adminRoutes);
 
     const port = process.env.PORT || 3000;
 
