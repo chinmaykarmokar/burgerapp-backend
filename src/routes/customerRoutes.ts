@@ -1,6 +1,10 @@
 import express, { Request, Response } from "express";
 import { Customers } from "../Entities/CustomerEntity";
 import connectDB from "../../config/ormconfig";
+
+// Import middlewares
+import authenticateCustomerToken from "../../middlewares/customerAuthMiddleware";
+
 const bcrypt = require("bcrypt");
 
 const app = express();
@@ -42,8 +46,8 @@ router.post("/customerRegister", async (req: Request,res: Response) => {
 })
 
 // List of all customers
-router.get("/allCustomers", async (req,res) => {
-    const data = await connectDB.getRepository(Customers).find();
+router.get("/allCustomers", authenticateCustomerToken, async (req:any ,res: any) => {
+    const data = await connectDB.getRepository(Customers).find({ where: {email: req.user.email} });
     res.json({
         data: data,
         worker_process: process.pid
