@@ -1,6 +1,5 @@
 import { CustomerTokens } from "../src/Entities/CustomerTokenList";
 import connectDB from "../config/ormconfig";
-import { connect } from "http2";
 
 const jwt = require("jsonwebtoken");
 

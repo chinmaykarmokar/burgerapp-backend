@@ -2,6 +2,9 @@ import express, { Request, Response } from "express";
 import { Admin } from "../Entities/AdminEntity";
 import connectDB from "../../config/ormconfig";
 
+// Import admin login middleware
+import authenticateAdminToken from "../../middlewares/adminAuthMiddleware";
+
 // Using environment variables
 import dotenv from "dotenv";
 dotenv.config();
@@ -39,9 +42,8 @@ router.post("/adminRegister", async (req: Request,res: Response) => {
     }
 })
 
-router.get("/adminDetails", async (req: Request, res: Response) => {
-    const data = await connectDB.getRepository(Admin).find();
-
+router.get("/adminDetails", authenticateAdminToken, async (req:any ,res: any) => {
+    const data = await connectDB.getRepository(Admin).find({ where: {email: req.user?.email} });
     res.json({
         data: data,
         worker_process: process.pid
