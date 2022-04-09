@@ -4,6 +4,7 @@ import connectDB from "../config/ormconfig";
 // Import API routes
 import customerRoutes from "./routes/customerRoutes";
 import customerLoginRoutes from "../authentication/customerLoginRoutes";
+import adminLoginRoutes from "../authentication/adminLoginRoutes";
 import adminRoutes from "./routes/adminRoutes";
 
 const mainServer = () => {
@@ -19,6 +20,7 @@ const mainServer = () => {
     app.use("/api/customers", customerRoutes);
     app.use("/api/customers", customerLoginRoutes);
     app.use("/api/admin", adminRoutes);
+    app.use("/api/admin", adminLoginRoutes);
 
     const port = process.env.PORT || 3000;
 

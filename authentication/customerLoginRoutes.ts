@@ -20,7 +20,9 @@ const uniqueID = crypto.randomBytes(16).toString("hex");
 
 router.post("/customerLogin", async (req: Request, res: Response) => {
     const customerExists = await connectDB.getRepository(Customers).findOne({where: {email: req.body.email}})
-    const decryptedPassword = await bcrypt.compare(req.body.password,customerExists?.password)
+    const decryptedPassword = await bcrypt.compare(req.body.password,customerExists?.password || " ")
+
+    console.log(decryptedPassword);
 
     if (customerExists?.email == req.body.email && decryptedPassword) {
         const customerLoginDetails = {
