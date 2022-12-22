@@ -9,9 +9,6 @@ export class AdminTokens extends BaseEntity {
         email!: string;
 
     @Column()
-        unique_id!: string;
-
-    @Column()
         token_issued!: string;
 
     @CreateDateColumn({ type: "timestamptz" })
