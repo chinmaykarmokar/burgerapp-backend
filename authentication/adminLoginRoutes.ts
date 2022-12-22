@@ -8,9 +8,6 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-
-const uniqueID = crypto.randomBytes(16).toString("hex");
 
 // Decrypting password
 const bcrypt = require("bcrypt");
@@ -30,14 +27,12 @@ router.post("/adminLogin", async (req: Request, res: Response) => {
         const adminLoginDetails = {
             email: req.body.email,
             password: req.body.password,
-            unique_id: uniqueID
         }
 
         const accessToken = jwt.sign(adminLoginDetails, process.env.ACCESS_TOKEN);
 
         await connectDB.getRepository(AdminTokens).insert({
             email: adminLoginDetails?.email,
-            unique_id: adminLoginDetails?.unique_id,
             token_issued: accessToken
         })
 

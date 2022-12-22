@@ -11,37 +11,34 @@ const authenticateAdminToken = async (req: any, res: any, next: any) => {
     const authHeader = req.headers["authorization"];
     const tokenInUse = authHeader?.split(" ")[1];
 
-    const findAdmin = await connectDB.getRepository(AdminTokens).find({ 
+    const findAdmin = await connectDB.getRepository(AdminTokens).findOne({ 
         where: {token_issued: tokenInUse},
         order: {id: "DESC"} 
     })
 
-    console.log("tokenInUSe", findAdmin[0]?.unique_id);
-
-    const latestTokenCreatedByAdmin = await connectDB.getRepository(AdminTokens).find({ 
-        where: {email: findAdmin[0]?.email}, 
-        order: {id: "DESC"},
-        take: 1
+    const latestTokenCreatedByAdmin = await connectDB.getRepository(AdminTokens).findOne({ 
+        where: {email: findAdmin?.email}, 
+        order: {id: "DESC"}
     })
 
-    console.log("latestToken", latestTokenCreatedByAdmin[0]?.unique_id);
+    // console.log("latestToken", latestTokenCreatedByAdmin?.unique_id);
 
-    const tokenValidTime = Math.abs(new Date().valueOf() - findAdmin[0]?.token_created_on.valueOf())/60000;
+    const tokenValidTime = Math.abs(new Date().getTime() - findAdmin!.token_created_on.getTime())/60000;
     console.log(tokenValidTime);
 
     if (tokenInUse === null || tokenInUse == undefined) {
-        res.status(403);
+        return res.status(403);
     }
 
-    if (findAdmin[0]?.unique_id != latestTokenCreatedByAdmin[0]?.unique_id || tokenValidTime >= 5) {
-        res.status(401).json({
-            message: "This token has been invalidated. Your session has experied. Please login again to continue."
+    if (findAdmin?.token_issued != latestTokenCreatedByAdmin?.token_issued || tokenValidTime >= 20) {
+        return res.status(401).json({
+            message: "Session experied. Please login to continue."
         })
     }
 
     jwt.verify(tokenInUse, process.env.ACCESS_TOKEN, async (err: any, user: any) => {
         if (err) {
-            res.status(403);
+            return res.status(403);
         }
         else {
             res.user = user;
