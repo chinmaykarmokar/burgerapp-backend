@@ -30,7 +30,7 @@ const authenticateAdminToken = async (req: any, res: any, next: any) => {
         return res.status(403);
     }
 
-    if (findAdmin?.token_issued != latestTokenCreatedByAdmin?.token_issued || tokenValidTime >= 20) {
+    if (findAdmin?.token_issued != latestTokenCreatedByAdmin?.token_issued || tokenValidTime >= 1000) {
         return res.status(401).json({
             message: "Session experied. Please login to continue."
         })
