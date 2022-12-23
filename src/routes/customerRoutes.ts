@@ -1,6 +1,9 @@
 import express, { Request, Response } from "express";
-import { Customers } from "../Entities/CustomerEntity";
 import connectDB from "../../config/ormconfig";
+
+// Import Entities
+import { Customers } from "../Entities/CustomerEntity";
+import { Menu } from "../Entities/MenuEntity";
 
 // Import middlewares
 import authenticateCustomerToken from "../../middlewares/customerAuthMiddleware";
@@ -53,6 +56,40 @@ router.get("/allCustomers", authenticateCustomerToken, async (req:any ,res: any)
         data: data,
         worker_process: process.pid
     })
+})
+
+// Menu List for all customers
+router.get("/menu", authenticateCustomerToken, async (req: Request, res: Response) => {
+    const getCompleteMenu =  await connectDB.getRepository(Menu).find();
+
+    if (getCompleteMenu != null || getCompleteMenu != undefined) {
+        res.json({
+            data: getCompleteMenu
+        })
+    }
+    else {
+        res.json({
+            error: "Menu cannot be displayed."
+        })
+    }
+})
+
+// Menu for only veg burgers
+router.get("/vegMenu", authenticateCustomerToken, async (req: Request, res: Response) => {
+    const getCompleteVegMenu =  await connectDB.getRepository(Menu).find({
+        where: {category: "Veg"}
+    });
+
+    if (getCompleteVegMenu != null || getCompleteVegMenu != undefined) {
+        res.json({
+            data: getCompleteVegMenu
+        })
+    }
+    else {
+        res.json({
+            error: "Vegetarian Menu cannot be displayed."
+        })
+    }
 })
 
 export default router;
