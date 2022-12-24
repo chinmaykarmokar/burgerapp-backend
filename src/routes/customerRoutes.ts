@@ -4,6 +4,7 @@ import connectDB from "../../config/ormconfig";
 // Import Entities
 import { Customers } from "../Entities/CustomerEntity";
 import { Menu } from "../Entities/MenuEntity";
+import { Cart } from "../Entities/CartEntity";
 
 // Import middlewares
 import authenticateCustomerToken from "../../middlewares/customerAuthMiddleware";
@@ -88,6 +89,37 @@ router.get("/vegMenu", authenticateCustomerToken, async (req: Request, res: Resp
     else {
         res.json({
             error: "Vegetarian Menu cannot be displayed."
+        })
+    }
+})
+
+// Add burgers to cart
+router.post("/addToCart/:id", authenticateCustomerToken, async (req: any, res: any) => {
+    const findCustomerAndAddToCustomerSpecificCart = await connectDB.getRepository(Customers).find({
+        where: {email: req?.user?.email} 
+    })
+
+    const menuList = await connectDB.getRepository(Menu).findOne({
+        where: {id: parseInt(req.params.id)}
+    });
+
+    if (findCustomerAndAddToCustomerSpecificCart[0]?.email != null && menuList != null) {
+        const itemToBeAddedInCart = {
+            email: findCustomerAndAddToCustomerSpecificCart[0]?.email,
+            burger_name: menuList?.burger_name,
+            burger_price: menuList?.price
+        }
+
+        await connectDB.getRepository(Cart).insert(itemToBeAddedInCart);
+
+        res.json({
+            message: `${menuList?.burger_name} successfully added to your cart.`
+        })
+    }
+
+    else {
+        res.json({
+            error: `${menuList?.burger_name} could not be added to the cart.`
         })
     }
 })
