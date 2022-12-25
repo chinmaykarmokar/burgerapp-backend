@@ -124,4 +124,20 @@ router.post("/addToCart/:id", authenticateCustomerToken, async (req: any, res: a
     }
 })
 
+// Show burgers in the cart
+router.get("/getCartItems", authenticateCustomerToken, async (req: any, res: any) => {
+    if (req.user != null || req.user != undefined) {
+        const showAllBurgersinCart = await connectDB.getRepository(Cart).findOne({
+            where: {email: req.user.email}
+        })
+
+        res.json({
+            data: showAllBurgersinCart
+        })
+    }
+    else {
+        error: "Cart cannot be displayed."
+    }
+})
+
 export default router;
