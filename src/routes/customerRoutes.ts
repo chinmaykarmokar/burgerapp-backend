@@ -107,14 +107,30 @@ router.post("/addToCart/:id", authenticateCustomerToken, async (req: any, res: a
         const itemToBeAddedInCart = {
             email: findCustomerAndAddToCustomerSpecificCart[0]?.email,
             burger_name: menuList?.burger_name,
-            burger_price: menuList?.price
+            burger_price: menuList?.price,
+            new_burger_price: menuList?.price
         }
 
-        await connectDB.getRepository(Cart).insert(itemToBeAddedInCart);
-
-        res.json({
-            message: `${menuList?.burger_name} successfully added to your cart.`
+        const checkIfBurgerAlreadyExists = await connectDB.getRepository(Cart).findOne({
+            where: {
+                burger_name: menuList?.burger_name,
+                email: findCustomerAndAddToCustomerSpecificCart[0]?.email
+            }
         })
+
+        if (checkIfBurgerAlreadyExists?.burger_name == itemToBeAddedInCart?.burger_name) {
+            res.json({
+                message: `${menuList?.burger_name} already exists in your cart.`
+            })
+        }
+
+        else {
+            await connectDB.getRepository(Cart).insert(itemToBeAddedInCart);
+
+            res.json({
+                message: `${menuList?.burger_name} successfully added to your cart.`
+            })
+        }
     }
 
     else {
@@ -127,7 +143,7 @@ router.post("/addToCart/:id", authenticateCustomerToken, async (req: any, res: a
 // Show burgers in the cart
 router.get("/getCartItems", authenticateCustomerToken, async (req: any, res: any) => {
     if (req.user != null || req.user != undefined) {
-        const showAllBurgersinCart = await connectDB.getRepository(Cart).findOne({
+        const showAllBurgersinCart = await connectDB.getRepository(Cart).find({
             where: {email: req.user.email}
         })
 
@@ -137,6 +153,72 @@ router.get("/getCartItems", authenticateCustomerToken, async (req: any, res: any
     }
     else {
         error: "Cart cannot be displayed."
+    }
+})
+
+// Update to add quantity of burgers in the cart
+router.put("/updateCartToAdd/:id", authenticateCustomerToken, async (req: any, res: any) => {
+    const findBurgerToUpdate = await connectDB.getRepository(Cart).findOne({
+        where: {id: parseInt(req.params.id)}
+    })
+
+    let quantityToBeAdded = findBurgerToUpdate?.quantity_of_burger + req.body.quantity;
+    console.log(quantityToBeAdded);
+
+    const quantityToUpdate = {
+        quantity_of_burger: quantityToBeAdded,
+        new_burger_price: findBurgerToUpdate!.new_burger_price + findBurgerToUpdate!.burger_price
+    }
+
+    if (findBurgerToUpdate != null || findBurgerToUpdate != undefined) {
+        await connectDB.getRepository(Cart).merge(findBurgerToUpdate, quantityToUpdate);
+        await connectDB.getRepository(Cart).save(findBurgerToUpdate);
+
+        res.json({
+            message: `Quantity for ${findBurgerToUpdate?.burger_name} updated.`
+        })
+    }
+    else {
+        res.json({
+            error: `Item in the cart could not be updated successfully.`
+        })
+    }
+})
+
+// Update to remove/reduce quantity of burgers in the cart
+router.put("/updateCartToRemove/:id", authenticateCustomerToken, async (req: any, res: any) => {
+    const findBurgerToUpdate = await connectDB.getRepository(Cart).findOne({
+        where: {id: parseInt(req.params.id)}
+    })
+
+    let quantityToBeAdded = findBurgerToUpdate!.quantity_of_burger - req.body.quantity;
+
+    const quantityToUpdate = {
+        quantity_of_burger: quantityToBeAdded,
+        new_burger_price: findBurgerToUpdate!.new_burger_price - findBurgerToUpdate!.burger_price
+    }
+
+    if (findBurgerToUpdate != null || findBurgerToUpdate != undefined) {
+        await connectDB.getRepository(Cart).merge(findBurgerToUpdate, quantityToUpdate);
+        await connectDB.getRepository(Cart).save(findBurgerToUpdate);
+
+        return res.json({
+            message: `Quantity for ${findBurgerToUpdate?.burger_name} updated.`
+        })
+    }
+
+    if (findBurgerToUpdate!.quantity_of_burger == 0) {
+        await connectDB.getRepository(Cart).delete(req.params.id);
+        
+        return res.json({
+            message: `${findBurgerToUpdate!.burger_name} removed from your cart successfully.` 
+        })
+    }
+
+    else {
+        res.json({
+            error: `Item in the cart could not be updated successfully.`
+        })
     }
 })
 
