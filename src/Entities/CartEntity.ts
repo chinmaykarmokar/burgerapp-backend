@@ -14,6 +14,9 @@ export class Cart extends BaseEntity {
     @Column ()
         burger_price!: number;
 
+    @Column () 
+        new_burger_price!: number;
+
     @Column ({default: 1})
         quantity_of_burger!: number;
 }
