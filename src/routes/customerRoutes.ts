@@ -5,9 +5,12 @@ import connectDB from "../../config/ormconfig";
 import { Customers } from "../Entities/CustomerEntity";
 import { Menu } from "../Entities/MenuEntity";
 import { Cart } from "../Entities/CartEntity";
+import { Orders } from "../Entities/OrdersEntity";
+import { Inventory } from "../Entities/InventoryEntity";
 
 // Import middlewares
 import authenticateCustomerToken from "../../middlewares/customerAuthMiddleware";
+import { In } from "typeorm";
 
 // Encrypt password
 const bcrypt = require("bcrypt");
@@ -218,6 +221,196 @@ router.put("/updateCartToRemove/:id", authenticateCustomerToken, async (req: any
     else {
         res.json({
             error: `Item in the cart could not be updated successfully.`
+        })
+    }
+})
+
+// Create order for specific user
+router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any) => {
+    const checkIfCustomerExists = await connectDB.getRepository(Customers).findOne({
+        where: {email: req.user.email}
+    })
+    if (checkIfCustomerExists !== null && checkIfCustomerExists !== undefined) {
+        const checkCartItemsForSpecificUser = await connectDB.getRepository(Cart).find({
+            where: {email: req.user.email}
+        })
+
+        if (checkCartItemsForSpecificUser.length == 0) {
+            return res.json({
+                message: "Your cart is empty and hence items could not be added."
+            })
+        }
+
+        else {
+            const cartPriceArray = checkCartItemsForSpecificUser.map((price) => {
+                return price?.new_burger_price
+            })
+    
+            const calculateTotalCartPrice = cartPriceArray.reduce((price1, pricen) => price1 + pricen, 0);
+    
+            const cartBurgersArray = checkCartItemsForSpecificUser.map((burger) => {
+                return burger?.burger_name
+            })
+    
+            const listOfBurgersInCart = cartBurgersArray.toString();
+    
+            const createOrderObject = {
+                email: checkIfCustomerExists?.email,
+                items: listOfBurgersInCart,
+                price: calculateTotalCartPrice,
+            }
+    
+            const findBurgerIngredientsFromTheMenu = await connectDB.getRepository(Menu).find({
+                where: {burger_name: In(cartBurgersArray)}
+            })
+    
+            const segregateBurgerIngredients = findBurgerIngredientsFromTheMenu.map((burgerIngredient) => {
+                return {
+                    burgers_per_bun: burgerIngredient?.burger_buns_per_burger,
+                    onions_per_bun: burgerIngredient?.onions_per_bun,
+                    tomatoes_per_bun: burgerIngredient?.tomatoes_per_bun,
+                    lettuce_per_bun: burgerIngredient?.lettuce_per_bun,
+                    chicken_patty: burgerIngredient?.chicken_patty,
+                    paneer_patty: burgerIngredient?.paneer_patty,
+                    cheese: burgerIngredient?.cheese
+                }
+            })
+    
+            const noOfBurgerBunsInOrder = segregateBurgerIngredients.map((singleIngredient) => {
+                return singleIngredient?.burgers_per_bun
+            })
+    
+            const totalBuns = noOfBurgerBunsInOrder.reduce((bun1, bunn) => bun1 + bunn, 0);
+    
+            const noOfOnionsInOrder = segregateBurgerIngredients.map((singleIngredient) => {
+                return singleIngredient?.onions_per_bun
+            })
+    
+            const exactQuantityOfOnionsInOrder = noOfOnionsInOrder.map(Number);
+    
+            const totalOnions = exactQuantityOfOnionsInOrder.reduce((onion1, onionn) => onion1 + onionn, 0);
+    
+            const noOfTomatoesInOrder = segregateBurgerIngredients.map((singleIngredient) => {
+                return singleIngredient?.tomatoes_per_bun
+            })
+    
+            const exactQuantityOfTomatoesInOrder = noOfTomatoesInOrder.map(Number);
+    
+            const totalTomatoes = exactQuantityOfTomatoesInOrder.reduce((tomato1, tomaton) => tomato1 + tomaton, 0);
+    
+            const noOfLettuceInOrder = segregateBurgerIngredients.map((singleIngredient) => {
+                return singleIngredient?.lettuce_per_bun
+            })
+    
+            const totalLettuce = noOfLettuceInOrder.reduce((lettuce1, lettucen) => lettuce1 + lettucen, 0);
+    
+            const noOfChickenPattyInOrder = segregateBurgerIngredients.map((singleIngredient) => {
+                return singleIngredient?.chicken_patty
+            })
+    
+            const totalChickenPatty = noOfChickenPattyInOrder.reduce((chicken1, chickenn) => chicken1 + chickenn, 0);
+    
+            const noOfPaneerPattyInOrder = segregateBurgerIngredients.map((singleIngredient) => {
+                return singleIngredient?.paneer_patty
+            })
+    
+            const totalPaneerPatty = noOfPaneerPattyInOrder.reduce((paneer1, paneern) => paneer1 + paneern, 0);
+    
+            const noOfCheeseInOrder = segregateBurgerIngredients.map((singleIngredient) => {
+                return singleIngredient?.cheese
+            })
+    
+            const totalCheese = noOfCheeseInOrder.reduce((cheese1, cheesen) => cheese1 + cheesen, 0);
+    
+            // Place Order
+            await connectDB.getRepository(Orders).insert(createOrderObject);
+    
+            // Delete existing items for that user from their cart
+            await connectDB.getRepository(Cart).delete({
+                email: checkIfCustomerExists?.email
+            })
+    
+            // Update Inventory Items on placing order
+            const getTomatoesFromInventory = await connectDB.getRepository(Inventory).findOne({
+                where: {food_item: "Tomatoes"}
+            });
+    
+            const getOnionsFromInventory = await connectDB.getRepository(Inventory).findOne({
+                where: {food_item: "Onions"}
+            });
+    
+            const getBurgerBunsFromInventory = await connectDB.getRepository(Inventory).findOne({
+                where: {food_item: "Burger Buns"}
+            });
+    
+            const getChickenPattyFromInventory = await connectDB.getRepository(Inventory).findOne({
+                where: {food_item: "Chicken Patty"}
+            });
+    
+            const getPaneerPattyFromInventory = await connectDB.getRepository(Inventory).findOne({
+                where: {food_item: "Paneer Patty"}
+            });
+    
+            const getLettuceFromInventory = await connectDB.getRepository(Inventory).findOne({
+                where: {food_item: "Lettuce"}
+            });
+    
+            const getCheeseFromInventory = await connectDB.getRepository(Inventory).findOne({
+                where: {food_item: "Cheese"}
+            });
+    
+            const updateTomatoesInTheInventory = {
+                quantity: getTomatoesFromInventory!.quantity - totalTomatoes
+            }
+    
+            const updateOnionsInTheInventory = {
+                quantity: getOnionsFromInventory!.quantity - totalOnions
+            }
+    
+            const updateBurgerBunsInTheInventory = {
+                quantity: getBurgerBunsFromInventory!.quantity - totalBuns
+            }
+    
+            const updateChickenPattyInTheInventory = {
+                quantity: getChickenPattyFromInventory!.quantity - totalChickenPatty
+            }
+    
+            const updatePaneerPattyInTheInventory = {
+                quantity: getPaneerPattyFromInventory!.quantity - totalPaneerPatty
+            }
+    
+            const updateLettuceInTheInventory = {
+                quantity: getLettuceFromInventory!.quantity - totalLettuce
+            }
+    
+            const updateCheeseInTheInventory = {
+                quantity: getCheeseFromInventory!.quantity - totalCheese
+            }
+    
+            // Update Inventory with placing of order
+            await connectDB.getRepository(Inventory).merge(getTomatoesFromInventory!, updateTomatoesInTheInventory);
+            await connectDB.getRepository(Inventory).save(getTomatoesFromInventory!);
+            await connectDB.getRepository(Inventory).merge(getOnionsFromInventory!, updateOnionsInTheInventory);
+            await connectDB.getRepository(Inventory).save(getOnionsFromInventory!);
+            await connectDB.getRepository(Inventory).merge(getBurgerBunsFromInventory!, updateBurgerBunsInTheInventory);
+            await connectDB.getRepository(Inventory).save(getBurgerBunsFromInventory!);
+            await connectDB.getRepository(Inventory).merge(getChickenPattyFromInventory!, updateChickenPattyInTheInventory);
+            await connectDB.getRepository(Inventory).save(getChickenPattyFromInventory!);
+            await connectDB.getRepository(Inventory).merge(getPaneerPattyFromInventory!, updatePaneerPattyInTheInventory);
+            await connectDB.getRepository(Inventory).save(getPaneerPattyFromInventory!);
+            await connectDB.getRepository(Inventory).merge(getLettuceFromInventory!, updateLettuceInTheInventory);
+            await connectDB.getRepository(Inventory).save(getLettuceFromInventory!);
+            await connectDB.getRepository(Inventory).merge(getCheeseFromInventory!, updateCheeseInTheInventory);
+            await connectDB.getRepository(Inventory).save(getCheeseFromInventory!);
+    
+            return res.json({
+                message: "Order placed successfully."
+            })
+        }
+    }
+    else {
+        res.json({
+            error: "Order could not be placed."
         })
     }
 })
