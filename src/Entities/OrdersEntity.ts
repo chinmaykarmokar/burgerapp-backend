@@ -9,6 +9,9 @@ export class Orders extends BaseEntity {
         email!: string;
 
     @Column ()
+        address!: string;
+
+    @Column ()
         items!: string;
 
     @Column ()

@@ -1,6 +1,9 @@
 import express, {Request, Response} from "express";
-import { DeliveryPerson } from "../Entities/DeliveryPerson.Entity";
 import connectDB from "../../config/ormconfig";
+
+// Import Entities
+import { DeliveryPerson } from "../Entities/DeliveryPerson.Entity";
+import { Orders } from "../Entities/OrdersEntity";
 
 // Import authentication middleware
 import authenticateDeliveryPersonToken from "../../middlewares/deliveryPersonAuthMiddleware";
@@ -57,8 +60,30 @@ router.get("/deliveryPerson", authenticateDeliveryPersonToken, async (req: any, 
         { 
             where: {email: req.user.email} 
         });
+
     res.json({
         data: allDeliveryPersons
+    })
+})
+
+// Update order status on completion
+router.post("/orderCompletion", authenticateDeliveryPersonToken, async (req: any, res: any) => {
+    const findDeliveryPerson = await connectDB.getRepository(DeliveryPerson).findOne({
+        where: {email: req.user.email}
+    })
+
+    const findOrderToUpdate = await connectDB.getRepository(Orders).findOne({
+        where: {id: findDeliveryPerson?.order_id}
+    })
+
+    await connectDB.getRepository(DeliveryPerson).merge(findDeliveryPerson!, {status: "available"});
+    await connectDB.getRepository(DeliveryPerson).save(findDeliveryPerson!);
+
+    await connectDB.getRepository(Orders).merge(findOrderToUpdate!,{delivery_status: "Completed"});
+    await connectDB.getRepository(Orders).save(findOrderToUpdate!);
+
+    res.json({
+        message: `Your order was completed successfully by delivery person ${findDeliveryPerson?.name}.`
     })
 })
 

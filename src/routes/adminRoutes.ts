@@ -5,6 +5,9 @@ import connectDB from "../../config/ormconfig";
 import { Admin } from "../Entities/AdminEntity";
 import { Inventory } from "../Entities/InventoryEntity";
 import { Menu } from "../Entities/MenuEntity";
+import { Orders } from "../Entities/OrdersEntity";
+import { DeliveryPerson } from "../Entities/DeliveryPerson.Entity";
+import { Customers } from "../Entities/CustomerEntity";
 
 // Import admin login middleware
 import authenticateAdminToken from "../../middlewares/adminAuthMiddleware";
@@ -174,6 +177,66 @@ router.put("/updateMenu/:id", authenticateAdminToken, async (req: Request, res: 
             error: `${findFoodItemToUpdate!.burger_name} could not be updated.`
         })
     }
+})
+
+// Get all the orders
+router.get("/getAllOrders", authenticateAdminToken, async (req: Request, res: Response) => {
+    const getAllOrders = await connectDB.getRepository(Orders).find({
+        where: {delivery_status: "Live"}
+    });
+
+    res.json({
+        data: getAllOrders
+    })
+})
+
+// Find Delivery Person Available
+router.get("/findDeliveryPersonAvailable/:id", authenticateAdminToken, async (req: Request, res: Response) => {
+    const findSingleOrderItem = await connectDB.getRepository(Orders).findOne({
+        where: {id: parseInt(req.params.id)}
+    })
+
+    const findDeliveryPersonAvailable = await connectDB.getRepository(DeliveryPerson).find({
+        where: {status: "available"}
+    })
+
+    // console.log(findSingleOrderItem);
+
+    res.json({
+        data: findDeliveryPersonAvailable,
+        orderSelected: findSingleOrderItem?.id
+    })
+})
+
+// Assign an order to a delivery person who is available
+router.post("/assignOrder/:orderID/:deliveryPersonID", authenticateAdminToken, async (req: any, res: any) => {
+    const findAvailableDeliveryPerson = await connectDB.getRepository(DeliveryPerson).findOne({
+        where: {id: parseInt(req.params.deliveryPersonID)}
+    })
+
+    const findOrder = await connectDB.getRepository(Orders).findOne({
+        where: {id: parseInt(req.params.orderID)}
+    })
+
+    const findUserFromOrder = await connectDB.getRepository(Customers).find({
+        where: {email: findOrder?.email}
+    })
+
+    const provideAddressAndOrderDetailsToDeliveryPerson = {
+        delivery_address: findUserFromOrder[0]?.address,
+        items_to_be_delivered: findOrder?.items,
+        status: "busy",
+        order_id: parseInt(req.params.orderID)
+    }
+
+    await connectDB.getRepository(DeliveryPerson).merge(findAvailableDeliveryPerson!,provideAddressAndOrderDetailsToDeliveryPerson);
+    await connectDB.getRepository(DeliveryPerson).save(findAvailableDeliveryPerson!);
+
+    res.json({
+        message: `Order assigned to delivery person ${findAvailableDeliveryPerson?.name}`
+    })
+
+    // console.log(findUserFromOrder);
 })
 
 export default router;

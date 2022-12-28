@@ -25,4 +25,13 @@ export class DeliveryPerson extends BaseEntity {
 
     @CreateDateColumn ({type: "timestamptz"})
         date_reg_on!: Date;
+
+    @Column ({default: " "})
+        delivery_address!: string;
+
+    @Column ({default: " "})
+        items_to_be_delivered!: string;
+
+    @Column ({default: 0})
+        order_id!: number;
 }
