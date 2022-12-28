@@ -28,6 +28,7 @@ router.post("/customerRegister", async (req: Request,res: Response) => {
             firstname: req.body.firstname,
             lastname: req.body.lastname,
             age: req.body.age,
+            address: req.body.address,
             mobile: req.body.mobile,
             email: req.body.email,
             password: await bcrypt.hash(req.body.password,salt)
@@ -230,6 +231,14 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
     const checkIfCustomerExists = await connectDB.getRepository(Customers).findOne({
         where: {email: req.user.email}
     })
+
+    const checkIfCustomerHasLiveOrder = await connectDB.getRepository(Orders).findOne({
+        where: {
+            email: checkIfCustomerExists?.email,
+            delivery_status: "Live"
+        }
+    })
+
     if (checkIfCustomerExists !== null && checkIfCustomerExists !== undefined) {
         const checkCartItemsForSpecificUser = await connectDB.getRepository(Cart).find({
             where: {email: req.user.email}
@@ -238,6 +247,12 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
         if (checkCartItemsForSpecificUser.length == 0) {
             return res.json({
                 message: "Your cart is empty and hence items could not be added."
+            })
+        }
+
+        if (checkIfCustomerHasLiveOrder?.delivery_status == "Live") {
+            return res.json({
+                message: "You already have an order that is live, hence order cannot be placed."
             })
         }
 
@@ -258,6 +273,7 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
                 email: checkIfCustomerExists?.email,
                 items: listOfBurgersInCart,
                 price: calculateTotalCartPrice,
+                address: checkIfCustomerExists?.address
             }
     
             const findBurgerIngredientsFromTheMenu = await connectDB.getRepository(Menu).find({
@@ -402,7 +418,7 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
             await connectDB.getRepository(Inventory).save(getLettuceFromInventory!);
             await connectDB.getRepository(Inventory).merge(getCheeseFromInventory!, updateCheeseInTheInventory);
             await connectDB.getRepository(Inventory).save(getCheeseFromInventory!);
-    
+
             return res.json({
                 message: "Order placed successfully."
             })
@@ -411,6 +427,27 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
     else {
         res.json({
             error: "Order could not be placed."
+        })
+    }
+})
+
+router.get("/getMyOrders", authenticateCustomerToken, async (req: any, res: Response) => {
+    const checkCustomerExists = await connectDB.getRepository(Customers).findOne({
+        where: {email: req.user.email}
+    })
+
+    if (checkCustomerExists?.email != null || checkCustomerExists?.email != undefined) {
+        const getUserSpecificOrders = await connectDB.getRepository(Orders).find({
+            where: {email: req.user.email}
+        })
+
+        res.json({
+            data: getUserSpecificOrders
+        })
+    }
+    else {
+        res.json({
+            message: "Could not load orders."
         })
     }
 })

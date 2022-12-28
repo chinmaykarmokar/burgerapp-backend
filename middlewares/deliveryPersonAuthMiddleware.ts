@@ -34,7 +34,7 @@ const authenticateDeliveryPersonToken = async (req:any, res:any, next:any) => {
         })
     }
 
-    if (currentDeliveryPersonToken?.token_issued !== findLatestTokenCreated?.token_issued || parseInt(tokenValidTime) >= 20) {
+    if (currentDeliveryPersonToken?.token_issued !== findLatestTokenCreated?.token_issued || parseInt(tokenValidTime) >= 10000000) {
         return res.status(401).send({
             message: "Session expired. Please login to continue."
         })

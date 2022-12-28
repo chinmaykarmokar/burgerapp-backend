@@ -14,6 +14,9 @@ export class Customers extends BaseEntity {
     @Column()
     age!: number;
 
+    @Column()
+    address!: string;
+
     @Column({type: "bigint"})
     mobile!: BigInt;
 
