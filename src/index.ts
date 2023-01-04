@@ -1,6 +1,9 @@
 import express, { Request, Response } from "express";
 import connectDB from "../config/ormconfig";
 
+// Import CORS
+const cors = require("cors");
+
 // Import API routes
 import customerRoutes from "./routes/customerRoutes";
 import customerLoginRoutes from "../authentication/customerLoginRoutes";
@@ -14,6 +17,9 @@ const mainServer = () => {
 
     // Parse JSON
     app.use(express.json());
+
+    // Use CORS
+    app.use(cors());
 
     // Connect to the database
     connectDB;
