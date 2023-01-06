@@ -179,14 +179,25 @@ router.put("/updateMenu/:id", authenticateAdminToken, async (req: Request, res: 
     }
 })
 
-// Get all the orders
-router.get("/getAllOrders", authenticateAdminToken, async (req: Request, res: Response) => {
-    const getAllOrders = await connectDB.getRepository(Orders).find({
+// Get all live orders
+router.get("/getAllLiveOrders", authenticateAdminToken, async (req: Request, res: Response) => {
+    const getAllLiveOrders = await connectDB.getRepository(Orders).find({
         where: {delivery_status: "Live"}
     });
 
     res.json({
-        data: getAllOrders
+        data: getAllLiveOrders
+    })
+})
+
+// Get all completed orders
+router.get("/getAllCompletedOrders", authenticateAdminToken, async (req: Request, res: Response) => {
+    const getAllCompletedOrders = await connectDB.getRepository(Orders).find({
+        where: {delivery_status: "Completed"}
+    });
+
+    res.json({
+        data: getAllCompletedOrders
     })
 })
 
