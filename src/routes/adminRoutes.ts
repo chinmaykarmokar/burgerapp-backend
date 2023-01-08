@@ -104,14 +104,40 @@ router.get("/allFoodItems", authenticateAdminToken, async (req: Request, res: Re
     }
 })
 
+// GET single item from inventory
+router.get("/singleInventoryItem/:id", authenticateAdminToken, async (req:any, res: Response) => {
+    const checkIfUserExists = await connectDB.getRepository(Admin).findOne({
+        where: {email: req?.user?.email}
+    })
+
+    if (checkIfUserExists?.email != null || checkIfUserExists?.email != undefined ) {
+        const findSingleItemFromInventory = await connectDB.getRepository(Inventory).findOne({
+            where: {id: req?.params?.id}
+        })
+
+        res.json({
+            data: findSingleItemFromInventory
+        })
+    }
+    else {
+        res.json({
+            message: "Could not find item in the inventory."
+        })
+    }
+})
+
 // Update food items in the inventory
 router.put("/updateInventory/:id", authenticateAdminToken, async (req: Request, res: Response) => {
     const findFoodItem = await connectDB.getRepository(Inventory).findOne({
         where: {id: parseInt(req.params.id)}
     })
 
+    const updatedQuantity = {
+        quantity: findFoodItem!.quantity - req.body
+    }
+
     if (findFoodItem != null || findFoodItem != undefined) {
-        connectDB.getRepository(Inventory).merge(findFoodItem,req.body);
+        connectDB.getRepository(Inventory).merge(findFoodItem, updatedQuantity);
         await connectDB.getRepository(Inventory).save(findFoodItem);
         res.json({
             message: "Food Item has been updated successfully in the inventory."
