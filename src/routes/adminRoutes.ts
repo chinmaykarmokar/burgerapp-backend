@@ -133,7 +133,7 @@ router.put("/updateInventory/:id", authenticateAdminToken, async (req: Request, 
     })
 
     const updatedQuantity = {
-        quantity: findFoodItem!.quantity - req.body
+        quantity: findFoodItem!.quantity + req.body.quantity
     }
 
     if (findFoodItem != null || findFoodItem != undefined) {
