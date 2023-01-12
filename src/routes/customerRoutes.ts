@@ -166,7 +166,7 @@ router.put("/updateCartToAdd/:id", authenticateCustomerToken, async (req: any, r
         where: {id: parseInt(req.params.id)}
     })
 
-    let quantityToBeAdded = findBurgerToUpdate?.quantity_of_burger + req.body.quantity;
+    let quantityToBeAdded = findBurgerToUpdate?.quantity_of_burger! + 1;
     console.log(quantityToBeAdded);
 
     const quantityToUpdate = {
@@ -195,11 +195,21 @@ router.put("/updateCartToRemove/:id", authenticateCustomerToken, async (req: any
         where: {id: parseInt(req.params.id)}
     })
 
-    let quantityToBeAdded = findBurgerToUpdate!.quantity_of_burger - req.body.quantity;
+    let quantityToBeAdded = findBurgerToUpdate!.quantity_of_burger - 1;
 
     const quantityToUpdate = {
         quantity_of_burger: quantityToBeAdded,
         new_burger_price: findBurgerToUpdate!.new_burger_price - findBurgerToUpdate!.burger_price
+    }
+
+    if (findBurgerToUpdate!.quantity_of_burger <= 1) {
+        await connectDB.getRepository(Cart).delete({
+            burger_name: findBurgerToUpdate?.burger_name
+        });
+        
+        return res.json({
+            message: `${findBurgerToUpdate!.burger_name} removed from your cart successfully.` 
+        })
     }
 
     if (findBurgerToUpdate != null || findBurgerToUpdate != undefined) {
@@ -208,14 +218,6 @@ router.put("/updateCartToRemove/:id", authenticateCustomerToken, async (req: any
 
         return res.json({
             message: `Quantity for ${findBurgerToUpdate?.burger_name} updated.`
-        })
-    }
-
-    if (findBurgerToUpdate!.quantity_of_burger == 0) {
-        await connectDB.getRepository(Cart).delete(req.params.id);
-        
-        return res.json({
-            message: `${findBurgerToUpdate!.burger_name} removed from your cart successfully.` 
         })
     }
 
