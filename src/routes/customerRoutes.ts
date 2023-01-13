@@ -259,23 +259,23 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
         }
 
         else {
-            const cartPriceArray = checkCartItemsForSpecificUser.map((price) => {
-                return price?.new_burger_price
-            })
+            // const cartPriceArray = checkCartItemsForSpecificUser.map((price) => {
+            //     return price?.new_burger_price
+            // })
     
-            const calculateTotalCartPrice = cartPriceArray.reduce((price1, pricen) => price1 + pricen, 0);
+            // const calculateTotalCartPrice = cartPriceArray.reduce((price1, pricen) => price1 + pricen, 0);
     
             const cartBurgersArray = checkCartItemsForSpecificUser.map((burger) => {
                 return burger?.burger_name
             })
     
-            const listOfBurgersInCart = cartBurgersArray.toString();
-    
+            // const listOfBurgersInCart = cartBurgersArray.toString();
+
             const createOrderObject = {
-                email: checkIfCustomerExists?.email,
-                items: listOfBurgersInCart,
-                price: calculateTotalCartPrice,
-                address: checkIfCustomerExists?.address
+                email: req.body.email,
+                items: req.body.items,
+                price: req.body.price,
+                address: req.body.address
             }
     
             const findBurgerIngredientsFromTheMenu = await connectDB.getRepository(Menu).find({
