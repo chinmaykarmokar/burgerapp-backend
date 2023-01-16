@@ -227,6 +227,17 @@ router.get("/getAllCompletedOrders", authenticateAdminToken, async (req: Request
     })
 })
 
+// Get single order to assign
+router.get("/getSingleOrderToAssign/:id", authenticateAdminToken, async (req: Request, res: Response) => {
+    const getSingleOrder = await connectDB.getRepository(Orders).findOne({
+        where: {id: parseInt(req.params.id)}
+    })
+
+    res.json({
+        data: getSingleOrder
+    })
+})
+
 // Find Delivery Person Available
 router.get("/findDeliveryPersonAvailable/:id", authenticateAdminToken, async (req: Request, res: Response) => {
     const findSingleOrderItem = await connectDB.getRepository(Orders).findOne({
@@ -240,8 +251,8 @@ router.get("/findDeliveryPersonAvailable/:id", authenticateAdminToken, async (re
     // console.log(findSingleOrderItem);
 
     res.json({
-        data: findDeliveryPersonAvailable,
-        orderSelected: findSingleOrderItem?.id
+        data: findDeliveryPersonAvailable
+        // orderSelected: findSingleOrderItem?.id
     })
 })
 
@@ -259,11 +270,18 @@ router.post("/assignOrder/:orderID/:deliveryPersonID", authenticateAdminToken, a
         where: {email: findOrder?.email}
     })
 
+    // const provideAddressAndOrderDetailsToDeliveryPerson = {
+    //     delivery_address: findUserFromOrder[0]?.address,
+    //     items_to_be_delivered: findOrder?.items,
+    //     status: "busy",
+    //     order_id: parseInt(req.params.orderID)
+    // }
+
     const provideAddressAndOrderDetailsToDeliveryPerson = {
-        delivery_address: findUserFromOrder[0]?.address,
-        items_to_be_delivered: findOrder?.items,
-        status: "busy",
-        order_id: parseInt(req.params.orderID)
+        delivery_address: req.body.delivery_address,
+        items_to_be_delivered: req.body.items_to_be_delivered,
+        status: req.body.status,
+        order_id: req.body.order_id
     }
 
     await connectDB.getRepository(DeliveryPerson).merge(findAvailableDeliveryPerson!,provideAddressAndOrderDetailsToDeliveryPerson);
