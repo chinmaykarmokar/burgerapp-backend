@@ -19,7 +19,7 @@ const bcrypt = require("bcrypt");
 const salt = 10;
 
 // Register profile for new delivery person
-router.post("/deliveryPersonRegister", async (req: Request, res: Response) => {
+router.post("/deliveryPersonRegister", async (req: Request, res: Response, next: any) => {
     try {
         let deliveryPersonPayload = {
             name: req.body.name,
@@ -51,7 +51,7 @@ router.post("/deliveryPersonRegister", async (req: Request, res: Response) => {
     }
 
     catch (error) {
-        throw error
+       next(error);
     }
 })
 

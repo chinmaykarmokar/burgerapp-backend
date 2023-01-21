@@ -29,7 +29,7 @@ const authenticateCustomerToken = async (req:any, res:any, next:any) => {
         return res.status(403);
     }
 
-    if (findCustomer[0]?.unique_id != latestTokenCreatedByCustomer[0]?.unique_id || tokenValidTime >= 5000) {
+    if (findCustomer[0]?.unique_id != latestTokenCreatedByCustomer[0]?.unique_id || tokenValidTime >= 10000000) {
         return res.status(401).json({
             message: "This token has been invalidated. Your session has experied. Please login again to continue."
         })
