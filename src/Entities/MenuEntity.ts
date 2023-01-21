@@ -34,4 +34,7 @@ export class Menu extends BaseEntity {
 
     @Column ()
         price!: number;
+
+    @Column ({nullable: true})
+        burger_image!: string;
 }
