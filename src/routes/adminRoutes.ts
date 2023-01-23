@@ -50,6 +50,15 @@ router.post("/adminRegister", async (req: Request,res: Response) => {
     }
 })
 
+// Get all customers
+router.get("/allCustomers", authenticateAdminToken, async (req: Request, res: Response) => {
+    const allCustomers = await connectDB.getRepository(Customers).find();
+
+    res.json({
+        data: allCustomers
+    })
+})
+
 // GET data about admin
 router.get("/adminDetails", authenticateAdminToken, async (req:any ,res: any) => {
     const data = await connectDB.getRepository(Admin).find({ where: {email: req.user?.email} });
@@ -182,6 +191,15 @@ router.post("/addToMenu", authenticateAdminToken, async (req: Request, res: Resp
     catch (err) {
         throw err;
     }
+})
+
+// Get complete menu
+router.get("/getCompleteMenu", authenticateAdminToken, async (req: Request, res: Response) => {
+    const getMenu = await connectDB.getRepository(Menu).find();
+
+    res.json({
+        data: getMenu
+    })
 })
 
 // Update Menu
