@@ -4,10 +4,12 @@ import connectDB from "../../config/ormconfig";
 // Import Entities
 import { DeliveryPerson } from "../Entities/DeliveryPerson.Entity";
 import { Orders } from "../Entities/OrdersEntity";
+import { Customers } from "../Entities/CustomerEntity";
 
 // Import authentication middleware
 import authenticateDeliveryPersonToken from "../../middlewares/deliveryPersonAuthMiddleware";
 import { Not } from "typeorm";
+import authenticateAdminToken from "../../middlewares/adminAuthMiddleware";
 
 // Parse JSON and use Router
 const app = express();
