@@ -1,6 +1,10 @@
 import express, {Request, Response} from "express";
 import connectDB from "../../config/ormconfig";
 
+// Using state variables
+import dotenv from "dotenv";
+dotenv.config();
+
 // Import Entities
 import { DeliveryPerson } from "../Entities/DeliveryPerson.Entity";
 import { Orders } from "../Entities/OrdersEntity";
@@ -19,6 +23,10 @@ const router = express.Router();
 // Encrypt password
 const bcrypt = require("bcrypt");
 const salt = 10;
+
+// Import sendgrid
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Register profile for new delivery person
 router.post("/deliveryPersonRegister", async (req: Request, res: Response, next: any) => {
@@ -48,6 +56,25 @@ router.post("/deliveryPersonRegister", async (req: Request, res: Response, next:
             await connectDB.getRepository(DeliveryPerson).insert(deliveryPersonPayload);
             res.json({
                 message: "Delivery Person successfully registered on our platform."
+            })
+
+            let message = {
+                to: req?.body?.email,
+                from: "burpger.dine@gmail.com",
+                subject: "You are successfully reistered as our customer!",
+                html: `
+                <p>
+                    Thanks <b>${req.body.name}</b> for registering with Burpger. 
+                    <br/>
+                    You have registered with the email <b>${req.body.email}</b>.
+                    <br/>
+                    You can now login to your account and see the orders you have been assigned!
+                </p>`
+            }
+
+            sgMail.send(message)
+            .then((response: any) => {
+                console.log(`Email has been sent to customer ${req.body.email}.`)
             })
         }
     }
