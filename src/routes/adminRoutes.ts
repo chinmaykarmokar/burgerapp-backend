@@ -302,8 +302,15 @@ router.post("/assignOrder/:orderID/:deliveryPersonID", authenticateAdminToken, a
         order_id: req.body.order_id
     }
 
+    const updateOrderStatusInTable = {
+        delivery_status: "Transit"
+    }
+
     await connectDB.getRepository(DeliveryPerson).merge(findAvailableDeliveryPerson!,provideAddressAndOrderDetailsToDeliveryPerson);
     await connectDB.getRepository(DeliveryPerson).save(findAvailableDeliveryPerson!);
+
+    await connectDB.getRepository(Orders).merge(findOrder!,updateOrderStatusInTable);
+    await connectDB.getRepository(Orders).save(findOrder!);
 
     res.json({
         message: `Order assigned to delivery person ${findAvailableDeliveryPerson?.name}`

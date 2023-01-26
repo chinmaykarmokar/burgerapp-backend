@@ -1,6 +1,10 @@
 import express, { Request, Response } from "express";
 import connectDB from "../../config/ormconfig";
 
+// Using state variables
+import dotenv from "dotenv";
+dotenv.config();
+
 // Import Entities
 import { Customers } from "../Entities/CustomerEntity";
 import { Menu } from "../Entities/MenuEntity";
@@ -19,10 +23,14 @@ const app = express();
 app.use(express.json());
 const router = express.Router();
 
+// Import sendgrid
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 const salt = 10;
 
 // Register new customers
-router.post("/customerRegister", async (req: Request,res: Response) => {
+router.post("/customerRegister", async (req: Request,res: Response, next: any) => {
     try {
         let customerDetails = {
             firstname: req.body.firstname,
@@ -44,13 +52,33 @@ router.post("/customerRegister", async (req: Request,res: Response) => {
 
         else {
             await connectDB.getRepository(Customers).insert(customerDetails);
+
             res.json({
                 message: "Customer registered on our platform."
             });
+
+            let message = {
+                to: req?.body?.email,
+                from: "burpger.dine@gmail.com",
+                subject: "You are successfully registered as our delivery person!",
+                html: `
+                <p>
+                    Thanks <b>${req.body.firstname}</b> for registering with Burpger. 
+                    <br/>
+                    You have registered with the email <b>${req.body.email}</b>.
+                    <br/>
+                    You can now login to your account and order the burgers of your choice!
+                </p>`
+            }
+
+            sgMail.send(message)
+            .then((response: any) => {
+                console.log(`Email has been sent to customer ${req.body.email}.`)
+            })
         }
     }
     catch (error) {
-        throw error;
+        next(error);
     }
 })
 
