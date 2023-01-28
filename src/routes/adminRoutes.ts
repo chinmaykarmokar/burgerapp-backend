@@ -28,8 +28,12 @@ app.use(express.json());
 
 const router = express.Router();
 
+// Import sendgrid
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 // Create Admin
-router.post("/adminRegister", async (req: Request,res: Response) => {
+router.post("/adminRegister", async (req: Request,res: Response, next: any) => {
     try {
         const adminDetails = {
             firstname: req.body.firstname,
@@ -46,7 +50,7 @@ router.post("/adminRegister", async (req: Request,res: Response) => {
         })
     }
     catch (error) {
-        throw error;
+        next(error);
     }
 })
 
@@ -69,7 +73,7 @@ router.get("/adminDetails", authenticateAdminToken, async (req:any ,res: any) =>
 })
 
 // Add new food items in the inventory
-router.post("/addToInventory", authenticateAdminToken, async (req:Request, res:Response ) => {
+router.post("/addToInventory", authenticateAdminToken, async (req:Request, res:Response, next: any) => {
     try {
         const inventoryItems = {
             food_item: req.body.food_item,
@@ -93,7 +97,7 @@ router.post("/addToInventory", authenticateAdminToken, async (req:Request, res:R
         }
     }
     catch (err) {
-        throw err;
+        next(err);
     }
 })
 
@@ -160,7 +164,7 @@ router.put("/updateInventory/:id", authenticateAdminToken, async (req: Request, 
 })
 
 // Create Menu 
-router.post("/addToMenu", authenticateAdminToken, async (req: Request, res: Response) => {
+router.post("/addToMenu", authenticateAdminToken, async (req: Request, res: Response, next: any) => {
     try {
         const menuItemList = {
             burger_name: req.body.burger_name,
@@ -189,7 +193,7 @@ router.post("/addToMenu", authenticateAdminToken, async (req: Request, res: Resp
         }
     }
     catch (err) {
-        throw err;
+        next(err);
     }
 })
 
@@ -288,13 +292,6 @@ router.post("/assignOrder/:orderID/:deliveryPersonID", authenticateAdminToken, a
         where: {email: findOrder?.email}
     })
 
-    // const provideAddressAndOrderDetailsToDeliveryPerson = {
-    //     delivery_address: findUserFromOrder[0]?.address,
-    //     items_to_be_delivered: findOrder?.items,
-    //     status: "busy",
-    //     order_id: parseInt(req.params.orderID)
-    // }
-
     const provideAddressAndOrderDetailsToDeliveryPerson = {
         delivery_address: req.body.delivery_address,
         items_to_be_delivered: req.body.items_to_be_delivered,
@@ -314,6 +311,23 @@ router.post("/assignOrder/:orderID/:deliveryPersonID", authenticateAdminToken, a
 
     res.json({
         message: `Order assigned to delivery person ${findAvailableDeliveryPerson?.name}`
+    })
+
+    let message = {
+        to: `${findAvailableDeliveryPerson?.email}`,
+        from: "burpger.dine@gmail.com",
+        subject: "New delivery assigned to you!",
+        html: `
+        <p>
+            Hello <b>${findAvailableDeliveryPerson?.name}</b>, you are assigned a new delivery. 
+            <br/>
+            Login to your account and see the orders you have been assigned!
+        </p>`
+    }
+
+    sgMail.send(message)
+    .then((response: any) => {
+        console.log(`Email has been sent to customer ${findAvailableDeliveryPerson?.email}.`)
     })
 
     // console.log(findUserFromOrder);

@@ -449,8 +449,25 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
             await connectDB.getRepository(Inventory).merge(getCheeseFromInventory!, updateCheeseInTheInventory);
             await connectDB.getRepository(Inventory).save(getCheeseFromInventory!);
 
-            return res.json({
+            res.json({
                 message: "Order placed successfully."
+            })
+            
+            let message = {
+                to: `${checkIfCustomerExists?.email}`,
+                from: "burpger.dine@gmail.com",
+                subject: "Your order has been placed successfully!",
+                html: `
+                <p>
+                    Hello, your order was placed successfully and will be delivered inside an hour. 
+                    <br/>
+                    Thank you for using our service!
+                </p>`
+            }
+
+            sgMail.send(message)
+            .then((response: any) => {
+                console.log(`Email has been sent to customer ${req.body.email}.`)
             })
         }
     }

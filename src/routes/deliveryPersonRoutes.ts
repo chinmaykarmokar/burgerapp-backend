@@ -124,13 +124,6 @@ router.post("/orderCompletion", authenticateDeliveryPersonToken, async (req: any
         where: {id: findDeliveryPerson?.order_id}
     })
 
-    // const orderUpdateData = {
-    //     status: "available",
-    //     items_to_be_delivered: " ",
-    //     delivery_address: " ",
-    //     order_id: 0
-    // }
-
     const orderUpdateData = {
         status: req.body.status,
         items_to_be_delivered: req.body.items_to_be_delivered,
@@ -146,6 +139,23 @@ router.post("/orderCompletion", authenticateDeliveryPersonToken, async (req: any
 
     res.json({
         message: `Your order was completed successfully by delivery person ${findDeliveryPerson?.name}.`
+    })
+
+    let message = {
+        to: `${findOrderToUpdate?.email}`,
+        from: "burpger.dine@gmail.com",
+        subject: "Your order was successfully delivered!",
+        html: `
+        <p>
+            Hello, thanks for ordering food from Burpger. 
+            <br/>
+            Your order was completed successfully by delivery person ${findDeliveryPerson?.name}.
+        </p>`
+    }
+
+    sgMail.send(message)
+    .then((response: any) => {
+        console.log(`Email has been sent to customer ${req.body.email}.`)
     })
 })
 
