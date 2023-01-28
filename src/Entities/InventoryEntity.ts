@@ -8,7 +8,7 @@ export class Inventory extends BaseEntity {
     @Column ()
         food_item!: string;
 
-    @Column ()
+    @Column ({type: "decimal", nullable: true})
         quantity!: number;
 
     @CreateDateColumn ()
