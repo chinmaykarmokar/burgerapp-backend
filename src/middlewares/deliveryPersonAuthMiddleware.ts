@@ -2,7 +2,7 @@
 import connectDB from "../config/ormconfig";
 
 // Import Entity
-import { DeliveryPersonTokens } from "../src/Entities/DeliveryPersonTokenList";
+import { DeliveryPersonTokens } from "../Entities/DeliveryPersonTokenList";
 
 // Import JWT
 const jwt = require("jsonwebtoken");

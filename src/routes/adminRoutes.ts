@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import connectDB from "../../config/ormconfig";
+import connectDB from "../config/ormconfig";
 
 // Import Entities
 import { Admin } from "../Entities/AdminEntity";
@@ -10,7 +10,7 @@ import { DeliveryPerson } from "../Entities/DeliveryPerson.Entity";
 import { Customers } from "../Entities/CustomerEntity";
 
 // Import admin login middleware
-import authenticateAdminToken from "../../middlewares/adminAuthMiddleware";
+import authenticateAdminToken from "../middlewares/adminAuthMiddleware";
 
 // Using environment variables
 import dotenv from "dotenv";

@@ -7,8 +7,8 @@ dotenv.config();
 import connectDB from "../config/ormconfig";
 
 // Import Entities
-import { Customers } from "../src/Entities/CustomerEntity";
-import { CustomerTokens } from "../src/Entities/CustomerTokenList";
+import { Customers } from "../Entities/CustomerEntity";
+import { CustomerTokens } from "../Entities/CustomerTokenList";
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");

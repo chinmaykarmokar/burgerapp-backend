@@ -1,4 +1,4 @@
-import { AdminTokens } from "../src/Entities/AdminTokenList";
+import { AdminTokens } from "../Entities/AdminTokenList";
 import connectDB from "../config/ormconfig";
 
 const jwt = require("jsonwebtoken");

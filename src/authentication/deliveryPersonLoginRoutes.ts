@@ -8,8 +8,8 @@ dotenv.config();
 import connectDB from "../config/ormconfig";
 
 // Import Entities
-import { DeliveryPerson } from "../src/Entities/DeliveryPerson.Entity";
-import { DeliveryPersonTokens } from "../src/Entities/DeliveryPersonTokenList";
+import { DeliveryPerson } from "../Entities/DeliveryPerson.Entity";
+import { DeliveryPersonTokens } from "../Entities/DeliveryPersonTokenList";
 
 // Pre-requisites
 const jwt = require("jsonwebtoken");

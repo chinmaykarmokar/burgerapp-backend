@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import connectDB from "../config/ormconfig";
-import { Admin } from "../src/Entities/AdminEntity";
-import { AdminTokens } from "../src/Entities/AdminTokenList";
+import { Admin } from "../Entities/AdminEntity";
+import { AdminTokens } from "../Entities/AdminTokenList";
 
 // Using environment variables
 import dotenv from "dotenv"

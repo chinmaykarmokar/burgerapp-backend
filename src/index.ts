@@ -1,16 +1,16 @@
 import express, { Request, Response } from "express";
-import connectDB from "../config/ormconfig";
+import connectDB from "./config/ormconfig";
 
 // Import CORS
 const cors = require("cors");
 
 // Import API routes
 import customerRoutes from "./routes/customerRoutes";
-import customerLoginRoutes from "../authentication/customerLoginRoutes";
+import customerLoginRoutes from "./authentication/customerLoginRoutes";
 import adminRoutes from "./routes/adminRoutes";
-import adminLoginRoutes from "../authentication/adminLoginRoutes";
+import adminLoginRoutes from "./authentication/adminLoginRoutes";
 import deliveryRoutes from "./routes/deliveryPersonRoutes";
-import deliveryLoginRoutes from "../authentication/deliveryPersonLoginRoutes";
+import deliveryLoginRoutes from "./authentication/deliveryPersonLoginRoutes";
 
 const mainServer = () => {
     const app = express();

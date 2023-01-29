@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import connectDB from "../../config/ormconfig";
+import connectDB from "../config/ormconfig";
 
 // Using state variables
 import dotenv from "dotenv";
@@ -13,7 +13,7 @@ import { Orders } from "../Entities/OrdersEntity";
 import { Inventory } from "../Entities/InventoryEntity";
 
 // Import middlewares
-import authenticateCustomerToken from "../../middlewares/customerAuthMiddleware";
+import authenticateCustomerToken from "../middlewares/customerAuthMiddleware";
 import { In } from "typeorm";
 
 // Encrypt password

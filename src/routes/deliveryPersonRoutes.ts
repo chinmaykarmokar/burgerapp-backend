@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express";
-import connectDB from "../../config/ormconfig";
+import connectDB from "../config/ormconfig";
 
 // Using state variables
 import dotenv from "dotenv";
@@ -11,9 +11,9 @@ import { Orders } from "../Entities/OrdersEntity";
 import { Customers } from "../Entities/CustomerEntity";
 
 // Import authentication middleware
-import authenticateDeliveryPersonToken from "../../middlewares/deliveryPersonAuthMiddleware";
+import authenticateDeliveryPersonToken from "../middlewares/deliveryPersonAuthMiddleware";
 import { Not } from "typeorm";
-import authenticateAdminToken from "../../middlewares/adminAuthMiddleware";
+import authenticateAdminToken from "../middlewares/adminAuthMiddleware";
 
 // Parse JSON and use Router
 const app = express();
