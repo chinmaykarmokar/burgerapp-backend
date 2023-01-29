@@ -19,13 +19,7 @@ const mainServer = () => {
     app.use(express.json());
 
     // Use CORS
-    app.use(cors(
-        {
-            origin: ["https://bespoke-hotteok-57c08c.netlify.app"],
-            methods: ["GET", "POST", "PUT", "DELETE"],
-            credentials: true,
-        }
-    ));
+    app.use(cors());
 
     // Connect to the database
     connectDB;
