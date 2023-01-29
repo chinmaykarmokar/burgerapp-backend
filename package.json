@@ -4,9 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p .",
     "run-dev": "nodemon --exec ts-node src/cluster.ts",
-    "start": "node ts-node src/cluster.ts"
+    "start": "node ./dist/src/cluster.js"
   },
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
