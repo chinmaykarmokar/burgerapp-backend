@@ -313,12 +313,6 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
                 return singleIngredient === null || singleIngredient === void 0 ? void 0 : singleIngredient.cheese;
             });
             const totalCheese = noOfCheeseInOrder.reduce((cheese1, cheesen) => cheese1 + cheesen, 0);
-            // Place Order
-            yield ormconfig_1.default.getRepository(OrdersEntity_1.Orders).insert(createOrderObject);
-            // Delete existing items for that user from their cart
-            yield ormconfig_1.default.getRepository(CartEntity_1.Cart).delete({
-                email: checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email
-            });
             // Update Inventory Items on placing order
             const getTomatoesFromInventory = yield ormconfig_1.default.getRepository(InventoryEntity_1.Inventory).findOne({
                 where: { food_item: "Tomatoes" }
@@ -341,6 +335,28 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
             const getCheeseFromInventory = yield ormconfig_1.default.getRepository(InventoryEntity_1.Inventory).findOne({
                 where: { food_item: "Cheese" }
             });
+            if (getTomatoesFromInventory.quantity || getOnionsFromInventory.quantity || getBurgerBunsFromInventory.quantity ||
+                getChickenPattyFromInventory.quantity || getPaneerPattyFromInventory.quantity || getLettuceFromInventory.quantity ||
+                getCheeseFromInventory.quantity <= 10) {
+                res.json({
+                    message: "Not enough stock of items in the inventory hence order cannot be placed."
+                });
+            }
+            let message = {
+                to: "chinmaykarmokar@gmail.com",
+                from: "burpger.dine@gmail.com",
+                subject: "Inventory running low",
+                html: `
+                <p>
+                    Hello <b>Chinmay</b>, this is to inform you that certain items in the inventory are running low on stock. You may have a look at them. 
+                    <br/>
+                    Thank you!
+                </p>`
+            };
+            sgMail.send(message)
+                .then((response) => {
+                console.log(`Email has been sent to customer ${req.body.email}.`);
+            });
             const updateTomatoesInTheInventory = {
                 quantity: getTomatoesFromInventory.quantity - totalTomatoes
             };
@@ -362,6 +378,12 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
             const updateCheeseInTheInventory = {
                 quantity: getCheeseFromInventory.quantity - totalCheese
             };
+            // Place Order
+            yield ormconfig_1.default.getRepository(OrdersEntity_1.Orders).insert(createOrderObject);
+            // Delete existing items for that user from their cart
+            yield ormconfig_1.default.getRepository(CartEntity_1.Cart).delete({
+                email: checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email
+            });
             // Update Inventory with placing of order
             yield ormconfig_1.default.getRepository(InventoryEntity_1.Inventory).merge(getTomatoesFromInventory, updateTomatoesInTheInventory);
             yield ormconfig_1.default.getRepository(InventoryEntity_1.Inventory).save(getTomatoesFromInventory);
@@ -379,21 +401,6 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
             yield ormconfig_1.default.getRepository(InventoryEntity_1.Inventory).save(getCheeseFromInventory);
             res.json({
                 message: "Order placed successfully."
-            });
-            let message = {
-                to: `${checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email}`,
-                from: "burpger.dine@gmail.com",
-                subject: "Your order has been placed successfully!",
-                html: `
-                <p>
-                    Hello, your order was placed successfully and will be delivered inside an hour. 
-                    <br/>
-                    Thank you for using our service!
-                </p>`
-            };
-            sgMail.send(message)
-                .then((response) => {
-                console.log(`Email has been sent to customer ${req.body.email}.`);
             });
         }
     }
