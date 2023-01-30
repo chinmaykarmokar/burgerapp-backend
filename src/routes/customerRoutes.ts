@@ -368,14 +368,6 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
     
             const totalCheese = noOfCheeseInOrder.reduce((cheese1, cheesen) => cheese1 + cheesen, 0);
     
-            // Place Order
-            await connectDB.getRepository(Orders).insert(createOrderObject);
-    
-            // Delete existing items for that user from their cart
-            await connectDB.getRepository(Cart).delete({
-                email: checkIfCustomerExists?.email
-            })
-    
             // Update Inventory Items on placing order
             const getTomatoesFromInventory = await connectDB.getRepository(Inventory).findOne({
                 where: {food_item: "Tomatoes"}
@@ -404,6 +396,33 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
             const getCheeseFromInventory = await connectDB.getRepository(Inventory).findOne({
                 where: {food_item: "Cheese"}
             });
+
+            if (
+                getTomatoesFromInventory!.quantity || getOnionsFromInventory!.quantity || getBurgerBunsFromInventory!.quantity ||
+                getChickenPattyFromInventory!.quantity || getPaneerPattyFromInventory!.quantity || getLettuceFromInventory!.quantity || 
+                getCheeseFromInventory!.quantity <= 10
+            ) {
+                res.json({
+                    message: "Not enough stock of items in the inventory hence order cannot be placed."
+                })
+            }
+
+            let message = {
+                to: "chinmaykarmokar@gmail.com",
+                from: "burpger.dine@gmail.com",
+                subject: "Inventory running low",
+                html: `
+                <p>
+                    Hello <b>Chinmay</b>, this is to inform you that certain items in the inventory are running low on stock. You may have a look at them. 
+                    <br/>
+                    Thank you!
+                </p>`
+            }
+
+            sgMail.send(message)
+            .then((response: any) => {
+                console.log(`Email has been sent to customer ${req.body.email}.`)
+            })
     
             const updateTomatoesInTheInventory = {
                 quantity: getTomatoesFromInventory!.quantity - totalTomatoes
@@ -432,6 +451,14 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
             const updateCheeseInTheInventory = {
                 quantity: getCheeseFromInventory!.quantity - totalCheese
             }
+
+            // Place Order
+            await connectDB.getRepository(Orders).insert(createOrderObject);
+    
+            // Delete existing items for that user from their cart
+            await connectDB.getRepository(Cart).delete({
+                email: checkIfCustomerExists?.email
+            })
     
             // Update Inventory with placing of order
             await connectDB.getRepository(Inventory).merge(getTomatoesFromInventory!, updateTomatoesInTheInventory);
@@ -451,23 +478,6 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
 
             res.json({
                 message: "Order placed successfully."
-            })
-            
-            let message = {
-                to: `${checkIfCustomerExists?.email}`,
-                from: "burpger.dine@gmail.com",
-                subject: "Your order has been placed successfully!",
-                html: `
-                <p>
-                    Hello, your order was placed successfully and will be delivered inside an hour. 
-                    <br/>
-                    Thank you for using our service!
-                </p>`
-            }
-
-            sgMail.send(message)
-            .then((response: any) => {
-                console.log(`Email has been sent to customer ${req.body.email}.`)
             })
         }
     }
