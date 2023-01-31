@@ -22,7 +22,7 @@ __decorate([
     __metadata("design:type", String)
 ], Inventory.prototype, "food_item", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "decimal", nullable: true }),
+    (0, typeorm_1.Column)({ type: "float", nullable: true }),
     __metadata("design:type", Number)
 ], Inventory.prototype, "quantity", void 0);
 __decorate([
