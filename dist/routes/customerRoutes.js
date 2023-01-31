@@ -62,7 +62,7 @@ router.post("/customerRegister", (req, res, next) => __awaiter(void 0, void 0, v
             let message = {
                 to: (_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.email,
                 from: "burpger.dine@gmail.com",
-                subject: "You are successfully registered as our delivery person!",
+                subject: "You are successfully registered as our customer!",
                 html: `
                 <p>
                     Thanks <b>${req.body.firstname}</b> for registering with Burpger. 

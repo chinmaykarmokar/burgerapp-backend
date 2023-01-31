@@ -60,7 +60,7 @@ router.post("/customerRegister", async (req: Request,res: Response, next: any) =
             let message = {
                 to: req?.body?.email,
                 from: "burpger.dine@gmail.com",
-                subject: "You are successfully registered as our delivery person!",
+                subject: "You are successfully registered as our customer!",
                 html: `
                 <p>
                     Thanks <b>${req.body.firstname}</b> for registering with Burpger. 
