@@ -342,21 +342,6 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
                     message: "Not enough stock of items in the inventory hence order cannot be placed."
                 });
             }
-            // let message = {
-            //     to: "chinmaykarmokar@gmail.com",
-            //     from: "burpger.dine@gmail.com",
-            //     subject: "Inventory running low",
-            //     html: `
-            //     <p>
-            //         Hello <b>Chinmay</b>, this is to inform you that certain items in the inventory are running low on stock. You may have a look at them. 
-            //         <br/>
-            //         Thank you!
-            //     </p>`
-            // }
-            // sgMail.send(message)
-            // .then((response: any) => {
-            //     console.log(`Email has been sent to customer ${req.body.email}.`)
-            // })
             const updateTomatoesInTheInventory = {
                 quantity: getTomatoesFromInventory.quantity - totalTomatoes
             };
@@ -380,6 +365,21 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
             };
             // Place Order
             yield ormconfig_1.default.getRepository(OrdersEntity_1.Orders).insert(createOrderObject);
+            let message = {
+                to: `${checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email}`,
+                from: "burpger.dine@gmail.com",
+                subject: "Your order was place successfully!",
+                html: `
+                <p>
+                    Hello, your order was placed successfully and will be delivered inside an hour. 
+                    <br/>
+                    Thank you for using Burpger!
+                </p>`
+            };
+            sgMail.send(message)
+                .then((response) => {
+                console.log(`Email has been sent to customer ${req.body.email}.`);
+            });
             // Delete existing items for that user from their cart
             yield ormconfig_1.default.getRepository(CartEntity_1.Cart).delete({
                 email: checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email
@@ -401,21 +401,6 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
             yield ormconfig_1.default.getRepository(InventoryEntity_1.Inventory).save(getCheeseFromInventory);
             res.json({
                 message: "Order placed successfully."
-            });
-            let message = {
-                to: `${checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email}`,
-                from: "burpger.dine@gmail.com",
-                subject: "Your order was place successfully!",
-                html: `
-                <p>
-                    Hello, your order was placed successfully and will be delivered inside an hour. 
-                    <br/>
-                    Thank you for using our service!
-                </p>`
-            };
-            sgMail.send(message)
-                .then((response) => {
-                console.log(`Email has been sent to customer ${req.body.email}.`);
             });
         }
     }
