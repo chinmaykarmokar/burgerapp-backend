@@ -402,6 +402,21 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
             res.json({
                 message: "Order placed successfully."
             });
+            let message = {
+                to: `${checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email}`,
+                from: "burpger.dine@gmail.com",
+                subject: "Inventory running low",
+                html: `
+                <p>
+                    Hello <b>Chinmay</b>, this is to inform you that certain items in the inventory are running low on stock. You may have a look at them. 
+                    <br/>
+                    Thank you!
+                </p>`
+            };
+            sgMail.send(message)
+                .then((response) => {
+                console.log(`Email has been sent to customer ${req.body.email}.`);
+            });
         }
     }
     else {
