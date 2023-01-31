@@ -405,12 +405,12 @@ router.post("/createOrder", customerAuthMiddleware_1.default, (req, res) => __aw
             let message = {
                 to: `${checkIfCustomerExists === null || checkIfCustomerExists === void 0 ? void 0 : checkIfCustomerExists.email}`,
                 from: "burpger.dine@gmail.com",
-                subject: "Inventory running low",
+                subject: "Your order was place successfully!",
                 html: `
                 <p>
-                    Hello <b>Chinmay</b>, this is to inform you that certain items in the inventory are running low on stock. You may have a look at them. 
+                    Hello, your order was placed successfully and will be delivered inside an hour. 
                     <br/>
-                    Thank you!
+                    Thank you for using our service!
                 </p>`
             };
             sgMail.send(message)

@@ -483,12 +483,12 @@ router.post("/createOrder", authenticateCustomerToken, async (req: any, res: any
             let message = {
                 to: `${checkIfCustomerExists?.email}`,
                 from: "burpger.dine@gmail.com",
-                subject: "Inventory running low",
+                subject: "Your order was place successfully!",
                 html: `
                 <p>
-                    Hello <b>Chinmay</b>, this is to inform you that certain items in the inventory are running low on stock. You may have a look at them. 
+                    Hello, your order was placed successfully and will be delivered inside an hour. 
                     <br/>
-                    Thank you!
+                    Thank you for using our service!
                 </p>`
             }
 
